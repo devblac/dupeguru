@@ -57,15 +57,15 @@ def remove_dupe_paths(files):
     result = []
     path2file = {}
     for f in files:
-        normalized = str(f.path).lower()
+        normalized = op.normcase(str(f.path))
         if normalized in path2file:
             try:
-                if op.samefile(normalized, str(path2file[normalized].path)):
+                if op.samefile(str(f.path), str(path2file[normalized].path)):
                     continue  # same file, it's a dupe
                 else:
                     pass  # We don't treat them as dupes
             except OSError:
-                continue  # File doesn't exist? Well, treat them as dupes
+                pass  # Avoid dropping files when samefile can't resolve paths
         else:
             path2file[normalized] = f
         result.append(f)
