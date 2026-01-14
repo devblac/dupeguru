@@ -221,6 +221,23 @@ def test_big_file_partial_hashes(fake_fileexists):
     eq_(len(r), 1)
 
 
+def test_remove_dupe_paths_preserves_case_sensitive_variants(fake_fileexists):
+    from core.scanner import remove_dupe_paths
+
+    f = [no("foo.jpg", path="folder"), no("foo.JPG", path="folder")]
+    r = remove_dupe_paths(f)
+    eq_(len(r), 2)
+
+
+def test_remove_dupe_paths_keeps_files_on_samefile_error(fake_fileexists, monkeypatch):
+    from core import scanner
+
+    monkeypatch.setattr(scanner.op, "samefile", lambda *_: (_ for _ in ()).throw(OSError("boom")))
+    f = [no("foo.jpg", path="folder"), no("foo.jpg", path="folder")]
+    r = scanner.remove_dupe_paths(f)
+    eq_(len(r), 2)
+
+
 def test_min_match_perc_doesnt_matter_for_content_scan(fake_fileexists):
     s = Scanner()
     s.scan_type = ScanType.CONTENTS
